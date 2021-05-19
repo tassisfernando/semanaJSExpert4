@@ -25,7 +25,7 @@ export default class SocketBuilder {
             withCredentials: false
         });
 
-        socket.on('connection', () => console.log('connected'));
+        socket.on('connect', () => console.log('connected'));
 
         socket.on(constants.events.USER_CONNECTED, this.onUserConnected);
         socket.on(constants.events.USER_DISCONNECTED, this.onUserDisconnected);
