@@ -3,6 +3,8 @@ export default class LobbyController {
         this.socketBuilder = socketBuilder
         this.user = user
         this.view = view
+
+        this.socket = {}
     }
 
     static async initialize(deps) {

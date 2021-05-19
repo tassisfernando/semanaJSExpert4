@@ -6,6 +6,9 @@ const roomTopic = document.getElementById('pTopic');
 
 const gridAttendees = document.getElementById('gridAttendees');
 const gridSpeakers = document.getElementById('gridSpeakers');
+const btnMicrophone = document.getElementById('btnMicrophone');
+const btnClipBoard = document.getElementById('btnClipBoard')
+const btnClap = document.getElementById('btnClap')
 
 export default class View {
 
@@ -52,5 +55,45 @@ export default class View {
             return;
         }
         baseElement.innerHTML += htmlTemplate
+    }
+
+    static _createAudioElement({ muted = true, srcObject }) {
+        const audio = document.createElement('audio')
+        audio.muted = muted
+        audio.srcObject = srcObject
+
+        audio.addEventListener('loadedmetadata', async () => {
+            try {
+                await audio.play()
+            } catch (error) {
+                console.error('error to play', error)
+            }
+        })
+    }
+
+    // static _appendToHTMLTree(userId, audio) {
+    //     const div = document.createElement('div')
+    //     div.id = userId
+    //     div.append(audio)
+    // }
+
+    static renderAudioElement({ callerId, stream, isCurrentId }) {
+        View._createAudioElement({
+            muted: isCurrentId,
+            srcObject: stream
+        })
+    }
+
+    static showUserFeatures(isSpeaker) {
+        if(!isSpeaker) {
+            btnClap.classList.remove('hidden')
+            btnMicrophone.classList.add('hidden')
+            btnClipBoard.classList.add('hidden')
+            return;
+        }
+
+        btnClap.classList.add('hidden')
+        btnMicrophone.classList.remove('hidden')
+        btnClipBoard.classList.remove('hidden')
     }
 }
