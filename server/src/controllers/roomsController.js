@@ -20,6 +20,40 @@ export default class RoomsController {
         }
     }
 
+    speakAnswer(socket, { answer, user }) {
+        const userId = user.id
+
+        const currentUser = this.#users.get(userId)
+        const updatedUser = new Attendee({
+            ...currentUser,
+            isSpeaker: answer
+        })
+
+        this.#users.set(userId, updatedUser)
+
+        const roomId = user.roomId
+        const room = this.rooms.get(roomId)
+        const userOnRoom = [...room.users.values()].find(({ id }) => id === userId)
+
+        room.users.delete(userOnRoom)
+        room.users.add(updatedUser)
+        this.rooms.set(roomId, room)
+
+        // volta para ele mesmo com o usuário com permissão
+        socket.emit(constants.event.UPGRADE_USER_PERMISSION, updatedUser)
+
+        // notifica para os outros da sala ligarem para o novo speaker
+        this.#notifyUserProfileUpgrade(socket, roomId, updatedUser)
+    }
+
+    speakRequest(socket) {
+        const userId = socket.id
+        const user = this.#users.get(userId)
+        const roomId = user.roomId
+        const owner = this.rooms.get(roomId)?.owner
+        socket.to(owner.id).emit(constants.event.SPEAK_REQUEST, user)
+    }
+
     notifyRoomSubscribers(rooms) {
         const event = constants.event.LOBBY_UPDATED
         this.roomsPubSub.emit(event, [...rooms.values()])
