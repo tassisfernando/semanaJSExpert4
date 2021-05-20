@@ -7,13 +7,11 @@ export default class CustomMap extends Map {
         this.#observer = observer
         this.#customMapper = customMapper
     }
-
-    * values(){
+    * values() {
         for(const value of super.values()) {
             yield this.#customMapper(value)
         }
     }
-
     set(...args) {
         const result = super.set(...args)
         this.#observer.notify(this)

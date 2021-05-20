@@ -1,13 +1,13 @@
 export default class LobbyController {
     constructor({ socketBuilder, user, view }) {
-        this.socketBuilder = socketBuilder
+        this.socketBuilder = socketBuilder 
         this.user = user
         this.view = view
 
         this.socket = {}
     }
 
-    static async initialize(deps) {
+    static initialize(deps) {
         return new LobbyController(deps)._init()
     }
 
@@ -19,12 +19,12 @@ export default class LobbyController {
     _setupViewEvents() {
         this.view.updateUserImage(this.user)
         this.view.configureCreateRoomButton()
+        
     }
-
     _setupSocket() {
         return this.socketBuilder
-            .setOnLobbyUpdated(this.onLobbyUpdated())
-            .build()
+        .setOnLobbyUpdated(this.onLobbyUpdated())
+        .build()
     }
 
     onLobbyUpdated() {

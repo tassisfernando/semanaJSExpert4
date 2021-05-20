@@ -1,5 +1,4 @@
 import UserStream from './entities/userStream.js'
-
 export default class RoomService {
     constructor({ media }) {
         this.media = media
@@ -12,12 +11,11 @@ export default class RoomService {
     }
 
     async init() {
-        this.currentStream =  new UserStream({
+        this.currentStream = new UserStream({
             stream: await this.media.getUserAudio(),
             isFake: false
         })
     }
-
     setCurrentPeer(peer) {
         this.currentPeer = peer
     }
@@ -27,16 +25,16 @@ export default class RoomService {
     }
 
     upgradeUserPermission(user) {
-        if(!user.isSpeaker) return;
+        if (!user.isSpeaker) return;
 
         const isCurrentUser = user.id === this.currentUser.id
-        if(!isCurrentUser) return;
+        if (!isCurrentUser) return;
 
         this.currentUser = user
     }
 
     updateCurrentUserProfile(users) {
-        this.currentUser = users.find(({ peerId }) => peerId === this.currentPeer.id);
+        this.currentUser = users.find(({ peerId }) => peerId === this.currentPeer.id)
     }
 
     async getCurrentStream() {
@@ -60,12 +58,12 @@ export default class RoomService {
         if(!this.peers.has(peerId)) return;
 
         this.peers.get(peerId).call.close()
-        this.peers.delete(peerId)
+        this.peers.delete(peerId);
     }
-
     async callNewUser(user) {
+        // se o usuario que entrou for speaker, ele vai me ligar!
         const { isSpeaker } = this.currentUser
-
+        
         if(!isSpeaker) return;
 
         const stream = await this.getCurrentStream()

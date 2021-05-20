@@ -1,14 +1,13 @@
 import Attendee from "../entities/attendee.js"
-
-const speakerIcon = '<img src="./../../assets/icons/asterisk.svg" alt="File icon" class="icon" />'
+const speakericon = '<img src="./../../assets/icons/asterisk.svg" alt="File icon" class="icon" />'
 
 export default function getTemplate(attendee = new Attendee()) {
-    const speakerTemplate = attendee.isSpeaker ? speakerIcon : ""
-    
+    const speakerTemplate = attendee.isSpeaker ? speakericon : ""
+
     return `
     <div id="${attendee.id}" class="room-card__user">
         <div class="room-card__user__img">
-            <img src="${attendee.img}" alt="${attendee.username}">
+        <img src="${attendee.img}" alt="${attendee.username}">
         </div>
         <p class="room-card__user__name">
         ${speakerTemplate}
@@ -17,3 +16,4 @@ export default function getTemplate(attendee = new Attendee()) {
     </div>
     `;
 }
+

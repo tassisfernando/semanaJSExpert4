@@ -1,5 +1,5 @@
 class PeerCustomModule extends globalThis.Peer {
-    constructor( { config, onCall } ) {
+    constructor({ config, onCall }) {
         super(config)
 
         this.onCall = onCall
@@ -8,22 +8,24 @@ class PeerCustomModule extends globalThis.Peer {
     call(...args) {
         const originalCallResult = super.call(...args)
 
+        // aqui acontece a magia, interceptamos o call e adicionamos
+        // o comportamento do call para todos os objetos
         this.onCall(originalCallResult)
 
         return originalCallResult
     }
 }
 
+
 export default class PeerBuilder {
     constructor({ peerConfig }) {
         this.peerConfig = peerConfig
-        this.onError = () => {}
-        this.onConnectionOpened = () => {}
-
-        this.onCallError = () => {}
-        this.onCallClose = () => {}
-        this.onCallReceived = () => {}
-        this.onStreamReceived = () => {}
+        this.onError = () => { }
+        this.onConnectionOpened = () => { }
+        this.onCallError = () => { }
+        this.onCallClose = () => { }
+        this.onCallReceived = () => { }
+        this.onStreamReceived = () => { }
     }
 
     setOnError(fn) {
@@ -61,7 +63,6 @@ export default class PeerBuilder {
 
         return this
     }
-
     _prepareCallEvent(call) {
         call.on('stream', (stream) => this.onStreamReceived(call, stream))
         call.on('error', (error) => this.onCallError(call, error))
@@ -69,8 +70,13 @@ export default class PeerBuilder {
 
         this.onCallReceived(call)
     }
-
+    
     async build() {
+        // o peer recebe uma lista de argumentos,
+        // new Peer(id, config1, config2)
+        // params = [], new Peer(...paramsc)
+
+        // const peer = new globalThis.Peer(...this.peerConfig)
         const peer = new PeerCustomModule({
             config: [...this.peerConfig],
             onCall: this._prepareCallEvent.bind(this)
@@ -78,10 +84,10 @@ export default class PeerBuilder {
         peer.on('error', this.onError)
         peer.on('call', this._prepareCallEvent.bind(this))
 
-
         return new Promise((resolve) => peer.on('open', () => {
             this.onConnectionOpened(peer)
             return resolve(peer)
         }))
     }
+
 }

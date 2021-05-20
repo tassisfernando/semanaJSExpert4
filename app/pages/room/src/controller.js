@@ -1,7 +1,8 @@
 import { constants } from "../../_shared/constants.js"
 import Attendee from "./entities/attendee.js"
+
 export default class RoomController {
-    constructor({ socketBuilder, roomInfo, view, peerBuilder, roomService }) {
+    constructor({ roomInfo, socketBuilder, view, peerBuilder, roomService }) {
         this.socketBuilder = socketBuilder
         this.peerBuilder = peerBuilder
         this.roomInfo = roomInfo
@@ -9,7 +10,6 @@ export default class RoomController {
         this.roomService = roomService
 
         this.socket = {}
-        this.peer = {}
     }
 
     static async initialize(deps) {
@@ -34,10 +34,9 @@ export default class RoomController {
             .setOnUserConnected(this.onUserConnected())
             .setOnUserDisconnected(this.onDisconnected())
             .setOnRoomUpdated(this.onRoomUpdated())
-            .setOnUserProfileUpgrade(this.onUserProfileUpgrade())
-            .build();
+            .setOnUserProfileUpgrade(this.onUserProfileUgrade())
+            .build()
     }
-
     async _setupWebRTC() {
         return this.peerBuilder
             .setOnError(this.onPeerError())
@@ -63,23 +62,25 @@ export default class RoomController {
     }
 
     onCallClose() {
-        return (call) => { 
-            console.log('onCallClose', call) 
+        return (call) => {
+            console.log('onCallClose', call)
             const peerId = call.peer
             this.roomService.disconnectPeer({ peerId })
+
         }
     }
 
     onCallError() {
-        return (call, error) => { 
+        return (call, error) => {
             console.log('onCallError', call, error)
             const peerId = call.peer
             this.roomService.disconnectPeer({ peerId })
+
         }
     }
 
     onCallReceived() {
-        return async (call) => { 
+        return async (call) => {
             const stream = await this.roomService.getCurrentStream()
             console.log('answering call', call)
             call.answer(stream)
@@ -87,28 +88,29 @@ export default class RoomController {
     }
 
     onPeerError() {
-        return (error) => { 
+        return (error) => {
             console.error('deu ruim', error)
         }
     }
-
+    // quando a conexao for aberta ele pede para entrar na sala do socket
     onPeerConnectionOpened() {
-        return (peer) => { 
-            console.log('peeerr', peer)
+        return (peer) => {
+            console.log('peeeeer', peer)
             this.roomInfo.user.peerId = peer.id
-            this.socket.emit(constants.events.JOIN_ROOM, this.roomInfo);
+            this.socket.emit(constants.events.JOIN_ROOM, this.roomInfo)
         }
     }
 
-    onUserProfileUpgrade() {
-        return (data) => { 
+    onUserProfileUgrade() {
+        return (data) => {
             const attendee = new Attendee(data)
-            console.log('onUserProfileUpgrade', attendee)
+            console.log('onUserProfileUgrade', attendee)
             this.roomService.upgradeUserPermission(attendee)
 
-            if(attendee.isSpeaker) {
+            if (attendee.isSpeaker) {
                 this.view.addAttendeeOnGrid(attendee, true)
             }
+
             this.activateUserFeatures()
         }
     }
@@ -116,21 +118,23 @@ export default class RoomController {
     onRoomUpdated() {
         return (data) => {
             const users = data.map(item => new Attendee(item))
+            console.log('room list!', users)
 
             this.view.updateAttendeesOnGrid(users)
             this.roomService.updateCurrentUserProfile(users)
             this.activateUserFeatures()
-            console.log('room list', users)}
+
+        }
     }
 
     onDisconnected() {
         return (data) => {
             const attendee = new Attendee(data)
-            this.view.removeItemFromGrid(attendee.id)
-            console.log(`${attendee.firstName} disconnected!`)
 
-            const {peerId} = attendee
-            this.roomService.disconnectPeer({ peerId })
+            console.log(`${attendee.username} disconnected!`)
+            this.view.removeItemFromGrid(attendee.id)
+            
+            this.roomService.disconnectPeer(attendee)
         }
     }
 
@@ -140,6 +144,7 @@ export default class RoomController {
             console.log('user connected!', attendee)
             this.view.addAttendeeOnGrid(attendee)
 
+            // vamos ligar!!
             this.roomService.callNewUser(attendee)
         }
     }

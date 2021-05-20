@@ -1,23 +1,21 @@
-import Attendee from '../src/entities/attendee.js';
-import getTemplate from '../src/templates/attendeeTemplate.js';
+import Attendee from "./entities/attendee.js"
+import getTemplate from "./templates/attendeeTemplate.js"
 
-const imgUser = document.getElementById('imgUser');
-const roomTopic = document.getElementById('pTopic');
-
-const gridAttendees = document.getElementById('gridAttendees');
-const gridSpeakers = document.getElementById('gridSpeakers');
-const btnMicrophone = document.getElementById('btnMicrophone');
+const imgUser = document.getElementById('imgUser')
+const roomTopic = document.getElementById('pTopic')
+const gridAttendees = document.getElementById('gridAttendees')
+const gridSpeakers = document.getElementById('gridSpeakers')
+const btnMicrophone = document.getElementById('btnMicrophone')
 const btnClipBoard = document.getElementById('btnClipBoard')
 const btnClap = document.getElementById('btnClap')
 
 export default class View {
-
     static updateUserImage({ img, username }) {
         imgUser.src = img
         imgUser.al = username
     }
 
-    static updateRoomTopic({topic}) {
+    static updateRoomTopic({ topic }) {
         roomTopic.innerHTML = topic
     }
 
@@ -30,10 +28,10 @@ export default class View {
         return existingItem
     }
 
+
     static removeItemFromGrid(id) {
         const existingElement = View._getExistingItemOnGrid({ id })
         existingElement?.remove()
-
     }
 
     static addAttendeeOnGrid(item, removeFirst = false) {
@@ -42,19 +40,20 @@ export default class View {
         const htmlTemplate = getTemplate(attendee)
         const baseElement = attendee.isSpeaker ? gridSpeakers : gridAttendees
 
-        if(removeFirst) {
+        if (removeFirst) {
             View.removeItemFromGrid(id)
             baseElement.innerHTML += htmlTemplate
             return;
         }
-        
-        const existingItem = View._getExistingItemOnGrid({ id, baseElement })
 
-        if(existingItem) {
-            existingItem.innerHTML = htmlTemplate
+        const existingItem = View._getExistingItemOnGrid({ id, baseElement })
+        if (existingItem) {
+            existingItem.innerHTML = htmlTemplate;
             return;
         }
+
         baseElement.innerHTML += htmlTemplate
+
     }
 
     static _createAudioElement({ muted = true, srcObject }) {
@@ -66,32 +65,31 @@ export default class View {
             try {
                 await audio.play()
             } catch (error) {
-                console.error('error to play', error)
+                console.error('erro to play', error)
             }
         })
+ 
     }
 
-    // static _appendToHTMLTree(userId, audio) {
-    //     const div = document.createElement('div')
-    //     div.id = userId
-    //     div.append(audio)
-    // }
+    
 
     static renderAudioElement({ callerId, stream, isCurrentId }) {
-        View._createAudioElement({
+        View._createAudioElement({ 
             muted: isCurrentId,
             srcObject: stream
-        })
-    }
+        }) 
 
+    }
     static showUserFeatures(isSpeaker) {
-        if(!isSpeaker) {
+
+        // attendee
+        if (!isSpeaker) {
             btnClap.classList.remove('hidden')
             btnMicrophone.classList.add('hidden')
             btnClipBoard.classList.add('hidden')
             return;
         }
-
+        // speaker
         btnClap.classList.add('hidden')
         btnMicrophone.classList.remove('hidden')
         btnClipBoard.classList.remove('hidden')
